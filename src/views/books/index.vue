@@ -18,6 +18,7 @@
             <div class="clearfix bottom">
               <p>简介： {{ item.bookIntro }}</p>
               <el-button type="success" @click="downloadBookById(item)">下载</el-button>
+              <el-button type="success" @click="testDownLoad(item)">测试下载</el-button>
               <el-button type="primary">查看</el-button>
             </div>
           </div>
@@ -28,7 +29,8 @@
 </template>
 
 <script>
-import { getBookById, getBookList, downloadBookById } from '@/api/book'
+import { getBookById, getBookList, downloadBookById, getBookDownloadURLById } from '@/api/book'
+import { downloadUrlFile, downloadFileByUrl } from '@/utils/file'
 
 export default {
   name: 'BookList',
@@ -37,7 +39,9 @@ export default {
       bookList: [],
       bookId: 1,
       book: {},
-      currentDate: new Date()
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 10
     }
   },
   created() {
@@ -83,11 +87,35 @@ export default {
     },
     downloadBookById(book) {
       this.$loading = true
-      downloadBookById(book.bookId)
+      getBookDownloadURLById(book.bookId)
         .then(res => {
           console.log(res)
-          this.book = res.data
-          this.$message(res.msg)
+          // this.book = res.data
+          downloadUrlFile(res.data, 'test.png')
+          this.$message({
+            message: res.msg || '成功',
+            type: 'success'
+          })
+        })
+        .catch(err => {
+          console.log(err)
+          this.$message({
+            message: err.msg,
+            type: 'error'
+          })
+        })
+        .finally(this.$loading = false)
+    },
+    testDownLoad(book) {
+      getBookDownloadURLById(book.bookId)
+        .then(res => {
+          console.log(res)
+          // this.book = res.data
+          downloadFileByUrl(res.data)
+          this.$message({
+            message: res.msg || '成功',
+            type: 'success'
+          })
         })
         .catch(err => {
           console.log(err)

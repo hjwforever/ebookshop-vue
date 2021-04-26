@@ -11,3 +11,7 @@ export const getBookById = (id) => {
 export const downloadBookById = (bookId) => {
   return request(`/books/download?bookId=${parseInt(bookId)}`)
 }
+
+export const getBookDownloadURLById = (bookId) => {
+  return request(`/books/downloadUrl?bookId=${parseInt(bookId)}`)
+}
