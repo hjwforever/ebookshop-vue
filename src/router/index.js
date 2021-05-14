@@ -50,6 +50,12 @@ export const constantRoutes = [
   },
 
   {
+    path: '/read',
+    component: () => import('@/views/books/read.vue'),
+    meta: { title: '阅读', icon: 'dashboard' }
+  },
+
+  {
     path: '/',
     component: Layout,
     redirect: '/dashboard',
@@ -59,6 +65,19 @@ export const constantRoutes = [
         name: 'Dashboard',
         component: () => import('@/views/dashboard/index'),
         meta: { title: '首页', icon: 'dashboard' }
+      }
+    ]
+  },
+
+  {
+    path: '/books',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        name: 'Books',
+        component: () => import('@/views/books'),
+        meta: { title: '书城', icon: 'example' }
       }
     ]
   },

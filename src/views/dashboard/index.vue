@@ -9,7 +9,9 @@
     <el-card>
       {{ content }}
     </el-card>
-    <BookList />
+    <el-button type="primary" @click="dialogVisible = true">上传</el-button>
+    <UploadBook ref="upload" :limit-num.sync="limitNum" :dialog-visible.sync="dialogVisible" @updateBookList="updateBookList" />
+    <BookList ref="bookList" />
   </div>
 </template>
 
@@ -17,14 +19,24 @@
 import { mapGetters } from 'vuex'
 import { adminTest, userTest, publicTest, sellerTest } from '@/api/authTest'
 import BookList from '@/views/books'
+import UploadBook from '@/views/books/upload'
+
 export default {
   name: 'Dashboard',
   components: {
-    BookList
+    BookList, UploadBook
   },
   data() {
     return {
-      content: ''
+      content: '',
+      dialogVisible: false,
+      limitNum: 10,
+      formData: new FormData(),
+      uploadBookDetail: {
+        bookName: null,
+        bookAuthor: this.name,
+        price: null
+      }
     }
   },
   computed: {
@@ -34,21 +46,24 @@ export default {
     ])
   },
   methods: {
+    updateBookList() {
+      this.$refs.bookList.getBookList()
+    },
+    imporRuItem() {
+      this.dialogVisible = true
+      this.$nextTick(() => {
+        this.$refs['upload'].dialogVisible = true
+      })
+    },
     getAdminContent() {
       adminTest()
         .then(res => {
+          this.imporRuItem()
           console.log(res)
           this.content = res.data
           this.$message({
             message: res.msg || '成功',
             type: 'success'
-          })
-        })
-        .catch(err => {
-          console.log(err)
-          this.$message({
-            message: err,
-            type: 'error'
           })
         })
     },
@@ -62,13 +77,6 @@ export default {
             type: 'success'
           })
         })
-        .catch(err => {
-          console.log(err)
-          this.$message({
-            message: err,
-            type: 'error'
-          })
-        })
     },
     getUserContent() {
       userTest()
@@ -80,13 +88,6 @@ export default {
             type: 'success'
           })
         })
-        .catch(err => {
-          console.log(err)
-          this.$message({
-            message: err,
-            type: 'error'
-          })
-        })
     },
     getSellerContent() {
       sellerTest()
@@ -96,13 +97,6 @@ export default {
           this.$message({
             message: res.msg || '成功',
             type: 'success'
-          })
-        })
-        .catch(err => {
-          console.log(err)
-          this.$message({
-            message: err,
-            type: 'error'
           })
         })
     }

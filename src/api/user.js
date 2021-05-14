@@ -65,29 +65,35 @@ export const myPromise = ({
   },
   mockMsg = 'success'
 }) => {
-  return new Promise((resolve, reject) => {
-    axios(process.env.VUE_APP_TEST_URL)
-      .then(() => {
-        request({
-          url,
-          method,
-          data
+  return process.env.NODE_ENV !== 'production'
+    ? new Promise((resolve, reject) => {
+      axios(process.env.VUE_APP_TEST_URL)
+        .then(() => {
+          request({
+            url,
+            method,
+            data
+          })
+            .then(res => {
+              resolve(res)
+            })
+            .catch(err => {
+              reject(err)
+            })
         })
-          .then(res => {
-            resolve(res)
-          })
-          .catch(err => {
-            reject(err)
-          })
-      })
-      .catch(() => {
-        setTimeout(() => {
-          resolve({
-            code: 200,
-            data: mockData,
-            msg: mockMsg
-          })
-        }, 1500)
-      })
-  })
+        .catch(() => {
+          setTimeout(() => {
+            resolve({
+              code: 200,
+              data: mockData,
+              msg: mockMsg
+            })
+          }, 1500)
+        })
+    })
+    : request({
+      url,
+      method,
+      data
+    })
 }

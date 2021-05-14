@@ -7,7 +7,7 @@
  * @returns {Boolean}
  */
 export function isExternal(path) {
-  return /^(https?:|mailto:|tel:)/.test(path);
+  return /^(https?:|mailto:|tel:)/.test(path)
 }
 
 /**
@@ -15,7 +15,7 @@ export function isExternal(path) {
  * @returns {Boolean}
  */
 export function validUsername(str) {
-  return validUName(str) || validEmail(str);
+  return validUName(str) || validEmail(str)
 }
 
 /**
@@ -23,7 +23,7 @@ export function validUsername(str) {
  * @returns {Boolean}
  */
 export function validUName(str) {
-  return new RegExp("^[a-zA-Z0-9_-]{3,10}$").test(str);
+  return new RegExp('^[a-zA-Z0-9_-]{3,10}$').test(str)
 }
 
 /**
@@ -31,7 +31,7 @@ export function validUName(str) {
  * @returns {Boolean}
  */
 export function validEmail(str) {
-  return new RegExp("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$").test(
+  return new RegExp('^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$').test(
     str
-  );
+  )
 }
