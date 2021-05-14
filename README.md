@@ -9,7 +9,7 @@
 ## Related Repositories
 
 - [E-book Shop Client with Vue2](https://github.com/hjwforever/ebookshop-vue)
-- [E-book Shop Server with SpringBoot](https://github.com/LedgerManagementSystem/ledger-management-system)
+- [E-book Shop Server with SpringBoot](https://github.com/hjwforever/ebookshop)
 
 ## Build Setup
 
