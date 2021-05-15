@@ -3,6 +3,8 @@
     <div class="dashboard-text">name: {{ name }}</div>
     <div class="dashboard-text">roles: <span v-for="role in roles" :key="role">{{ role }}</span></div>
     <el-button type="primary" @click="getPublicContent">测试公共权限</el-button>
+    <!-- <el-button :disabled="!checkPermission(['admin','seller'])" type="primary" @click="getAdminContent">测试管理员权限</el-button> -->
+    <!-- <el-button v-permission="['seller']" type="primary" @click="getUserContent">测试用户权限</el-button> -->
     <el-button type="primary" @click="getAdminContent">测试管理员权限</el-button>
     <el-button type="primary" @click="getUserContent">测试用户权限</el-button>
     <el-button type="primary" @click="getSellerContent">测试卖家权限</el-button>
@@ -18,6 +20,8 @@
 <script>
 import { mapGetters } from 'vuex'
 import { adminTest, userTest, publicTest, sellerTest } from '@/api/authTest'
+import permission from '@/directive/permission/index.js' // 权限判断指令
+import checkPermission from '@/utils/permission' // 权限判断函数
 import BookList from '@/views/books'
 import UploadBook from '@/views/books/upload'
 
@@ -26,6 +30,7 @@ export default {
   components: {
     BookList, UploadBook
   },
+  directives: { permission },
   data() {
     return {
       content: '',
@@ -46,6 +51,7 @@ export default {
     ])
   },
   methods: {
+    checkPermission,
     updateBookList() {
       this.$refs.bookList.getBookList()
     },

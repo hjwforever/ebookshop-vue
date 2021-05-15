@@ -38,7 +38,7 @@ export function downloadFileByUrl(url) {
     forceDesktopMode: true,
     // withCredentials: true,
     nameCallback: function(name) {
-      return 'ebookshop-' + name
+      return 'ebookshop-' + decodeURI(name)
     }
   })
     .then(function() {

@@ -124,7 +124,10 @@ export default {
       this.uploadBtnText = '正在上传'
       this.formData = new FormData()
       const book = this.fileList[0]
+      // const extension = book.name.substring(book.name.lastIndexOf('.') + 1)
       this.formData.append('uploadFile', book)
+      // this.formData.append('author', this.name)
+      // this.formData.append('bookName', book.name.replace(extension, ''))
       console.log('formData', this.formData.get('uploadFile'))
 
       const bookName = book.name.toString().replace('.txt', '')

@@ -9,70 +9,32 @@
     <el-card class="col-auto">
       {{ book.bookName ? book.bookName : '' }}
     </el-card>
-    <el-button type="primary" @click="getBookById">上传书籍</el-button>
-    <!-- <el-button type="primary" style="float: left;margin-left: 50px" @click="uploadDialogVisible = true">批量注册</el-button> -->
-    <!--  上传xlsx文件批量注册 -->
-    <!-- <el-dialog v-if="uploadDialogVisible" title="批量注册-导入excel" :visible.sync="uploadDialogVisible" width="40%">
-      <el-upload
-        class="upload-container"
-        drag
-        :show-file-list="false"
-        :http-request="httpRequest"
-        :limit="limitNum"
-        multiple
-        :auto-upload="autoUpload"
-        accept=".txt"
-        :action="UploadUrl()"
-        :before-upload="beforeUploadFile"
-        :on-change="fileChange"
-        :on-exceed="exceedFile"
-        :on-success="handleSuccess"
-        :on-error="handleError"
-        :file-list="fileList"
-      >
-        <i class="ml-10 el-icon-upload" />
-        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-        <div slot="tip" class="el-upload__tip">只能上传txt文件，且不超过10M</div>
-      </el-upload>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="uploadDialogVisible = false">返回</el-button>
-        <!--        <el-button type="primary" @click="uploadFile">确 定</el-button>-->
-    <!-- </span>
-    </el-dialog> -->
     <el-row :gutter="10">
       <el-col v-for="item in bookList" :key="item.bookId" :xs="12" :sm="8" :md="6" :lg="6" :xl="3">
         <el-card :body-style="{ padding: '0px' }" class="bookItem">
           <el-image :src="item.bookCoverImg" fit="fill" class="image" />
           <div style="padding: 14px;">
             <span>{{ item.bookName }}</span>
-            <div class="clearfix bottom">
-              <p>简介： {{ item.bookIntro }}</p>
-              <!-- <el-button type="success" @click="downloadBookById(item)">下载</el-button> -->
-              <el-button type="success" @click="downLoadBookId(item.bookId)">下载</el-button>
-              <el-button type="primary">查看</el-button>
-            </div>
+            <el-rate
+              :value="item.starts"
+              disabled
+              show-score
+              text-color="#ff9900"
+              :score-template="item.starts.toFixed(1)"
+            />
+            <span>作者: {{ item.author }}</span>
+            <p>简介：{{ returnIntro(item.bookIntro) }}</p>
+            <el-button type="success" @click="beforeDownloadHandle(item)">下载</el-button>
+            <el-button type="primary">阅读</el-button>
           </div>
         </el-card>
       </el-col>
-      <!-- <el-pagination
-        background
-        :current-page="currentPage"
-        :page-size="pageSize"
-        :pager-count="totalPages"
-        layout="prev, pager, next"
-        :total="totalItems"
-        @prev-click="loadTable"
-        @current-change="loadTable"
-        @next-click="loadTable"
-      /> -->
-      <!-- :pager-count="totalPages" -->
       <el-col>
         <el-pagination
           background
           layout="prev, pager, next"
           :page-size="pageSize"
           :current-page="currentPage"
-
           :total="totalItems"
           @prev-click="loadTable"
           @current-change="loadTable"
@@ -80,12 +42,20 @@
         >2</el-pagination>
       </el-col>
     </el-row>
+    <el-dialog title="选择下载方式" :visible.sync="dialogDownloadVisible">
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogDownloadVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogDownloadVisible = false">确 定</el-button>
+        <el-button type="success" @click="downloadBookByURL">URL下载</el-button>
+        <el-button type="success" @click="downloadBookById">服务器下载</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getBookById, getBookList, /* downloadBookById,*/ getBookDownloadURLById } from '@/api/book'
-import { downloadUrlFile, downloadFileByUrl } from '@/utils/file'
+import { getBookById, getBookList, downloadBookById } from '@/api/book'
+import { downloadFileByUrl } from '@/utils/file'
 
 export default {
   name: 'BookList',
@@ -109,7 +79,11 @@ export default {
       autoUpload: true,
       limitNum: 10,
       fileList: [],
-      uploadDialogVisible: false
+      uploadDialogVisible: false,
+
+      // download
+      dowloadBook: null,
+      dialogDownloadVisible: false
     }
   },
   computed: {
@@ -121,37 +95,53 @@ export default {
     this.getBookList()
   },
   methods: {
+    returnIntro(intro) {
+      if (intro.length > 11) {
+        const reg = /[\u3002|\uff1f|\uff01|\uff0c|\u3001|\uff1b|\uff1a|]/
+        const result = intro.substr(0, 10)
+        return reg.test(result.slice(-1)) ? result.substr(0, 9) + '...' : result
+      }
+      return intro
+    },
     loadTable(currentPage) {
       this.currentPage = currentPage
       this.getBookList()
     },
     getBookList() {
-      this.$loading = true
+      const loading = this.$loading({
+        lock: true,
+        text: '刷新书籍列表中...',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      })
+
       getBookList({
         pageNum: this.currentPage,
         pageSize: this.pageSize
       })
         .then(res => {
+          loading.close()
           console.log(res)
           this.bookList = res.data.content
           this.totalPages = res.data.totalPages || 1
           this.totalItems = res.data.totalElements || 10
           this.$message({
-            message: res.msg || '成功',
-            type: 'success'
+            message: '刷新成功',
+            type: 'success',
+            duration: 800
           })
         })
         .catch(err => {
+          loading.close()
           console.log(err)
           this.$message({
             message: err.msg,
             type: 'error'
           })
         })
-        .finally(this.$loading = false)
     },
     getBookById() {
-      this.$loading = true
+      // this.$loading = true
       getBookById(this.bookId)
         .then(res => {
           console.log(res)
@@ -165,48 +155,40 @@ export default {
             type: 'error'
           })
         })
-        .finally(this.$loading = false)
+        // .finally(this.$loading = false)
     },
-    downloadBookById(book) {
-      this.$loading = true
-      getBookDownloadURLById(book.bookId)
-        .then(res => {
-          console.log(res)
-          // this.book = res.data
-          downloadUrlFile(res.data, 'test.png')
-          this.$message({
-            message: res.msg || '成功',
-            type: 'success'
-          })
-        })
-        .catch(err => {
-          console.log(err)
-          this.$message({
-            message: err.msg,
-            type: 'error'
-          })
-        })
-        .finally(this.$loading = false)
+    beforeDownloadHandle(item) {
+      this.dowloadBook = item
+      this.dialogDownloadVisible = true
+      // this.$loading = true
     },
-    downLoadBookId(bookId) {
-      getBookDownloadURLById(bookId)
+    downloadBookById() {
+      console.log('book', this.dowloadBook)
+      downloadBookById(this.dowloadBook.bookId)
         .then(res => {
-          console.log(res)
-          // this.book = res.data
-          downloadFileByUrl(res.data)
-          this.$message({
-            message: res.msg || '成功',
-            type: 'success'
-          })
+          console.log('开始下载')
         })
-        .catch(err => {
-          console.log(err)
-          this.$message({
-            message: err.msg,
-            type: 'error'
-          })
-        })
-        .finally(this.$loading = false)
+    },
+    downloadBookByURL() {
+      downloadFileByUrl(this.dowloadBook.bookUrl)
+      // this.$loading = false
+      // .then(res => {
+      //   console.log(res)
+      //   // this.book = res.data
+      //   // downloadFileByUrl(res.data)
+      //   this.$message({
+      //     message: res.msg || '成功',
+      //     type: 'success'
+      //   })
+      // })
+      // .catch(err => {
+      //   console.log(err)
+      //   this.$message({
+      //     message: err.msg,
+      //     type: 'error'
+      //   })
+      // })
+      // .finally(this.$loading = false)
     },
     goToDetail(item) {
       this.$router.push({ path: `books/${item.bookId}` })
@@ -306,6 +288,12 @@ export default {
   // .el-card:hover{
   //   margin-top: -5px;
   // }
+
+  .bookItem {
+     padding: 0px;
+     max-height: 500px;
+  }
+
   .bottom {
     margin-top: 13px;
     line-height: 12px;

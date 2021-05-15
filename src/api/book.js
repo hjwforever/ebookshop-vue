@@ -28,7 +28,13 @@ export const getBookById = (id) => {
 }
 
 export const downloadBookById = (bookId) => {
-  return request(`/books/download?bookId=${parseInt(bookId)}`)
+  // return request({
+  //   url: `/books/download?bookId=${parseInt(bookId)}`
+  // })
+  return new Promise(resolve => {
+    window.location.href = `${process.env.VUE_APP_BASE_API}/books/download?bookId=${parseInt(bookId)}`
+    resolve()
+  })
 }
 
 export const getBookDownloadURLById = (bookId) => {
