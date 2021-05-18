@@ -40,3 +40,18 @@ export const downloadBookById = (bookId) => {
 export const getBookDownloadURLById = (bookId) => {
   return request(`/books/downloadUrl?bookId=${parseInt(bookId)}`)
 }
+
+export const getBookContent = ({
+  bookId,
+  page = -1,
+  pageStart = -1,
+  pageEnd = -1
+}) => {
+  if (page > 0) {
+    return request(`/books/${bookId}/pages/${page}`)
+  } else if (pageStart > 0 && pageStart < pageEnd) {
+    return request(`/books/${bookId}/pages/${pageStart}-${pageEnd}`)
+  } else {
+    console.log('请输入有效值')
+  }
+}
