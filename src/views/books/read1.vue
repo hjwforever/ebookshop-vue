@@ -1,81 +1,28 @@
 <template>
   <div>
-    <p>
-      23
-    </p>
-    <fw-turn>1111</fw-turn>
-    <fw-book
-      :data="pages"
-      :start-page-index="1"
-      :end-page-index="pages.length - 2"
-      :auto-next-page="autoNextPage"
-      :auto-next-page-delay-time="1000"
-      :loop="loop"
-      @next="pageChange"
-      @prev="pageChange"
-      @indexPageChange="indexPageChange"
-    >
-      <template v-slot:page="{ page, index }">
-        <img :src="page.src" :alt="`image${index}`">
-      </template>
-    </fw-book>
-    <fw-book
-      :data="bookPages"
-      :start-page-index="1"
-      :auto-next-page="autoNextPage"
-      :auto-next-page-delay-time="1000"
-      :loop="loop"
-      @next="pageChange"
-      @prev="pageChange"
-      @indexPageChange="indexPageChange"
-    >
-      <template v-slot:page="{ page, index }">
-        <img v-if="index===0" :src="page.src" alt="coverImg`">
+    <el-card>
+      <div v-for="page,index in pages" :key="page.index">
+        <img v-if="index === 0" :src="page.src">
         <p v-else>{{ page.content }}</p>
-        <!-- <p>{{ index }}：{{ page.content }}</p> -->
-      </template>
-    </fw-book>
-    <fw-bookblock>3333</fw-bookblock>
-    <fw-bookblock2>4444</fw-bookblock2>
-    <el-button tyre="primary" @click="getBookPages">获取内容</el-button>
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
-import { FwTurn, FwBook, FwBookblock, FwBookblock2 } from 'vue-turnjs'
+// import { FwBook } from 'vue-turnjs'
 import { getBookContent } from '@/api/book'
 
 export default {
   components: {
-    FwTurn, FwBook, FwBookblock, FwBookblock2
+    // FwBook
   },
   data() {
     return {
       autoNextPage: false,
       loop: false,
-      pages: [
-        {
-          src:
-            'https://raw.githubusercontent.com/Reidond/vue-turnjs/develop/static/bookblock/1.jpg'
-        },
-        {
-          src:
-            'https://raw.githubusercontent.com/Reidond/vue-turnjs/develop/static/bookblock/2.jpg'
-        },
-        {
-          src:
-            'https://raw.githubusercontent.com/Reidond/vue-turnjs/develop/static/bookblock/3.jpg'
-        },
-        {
-          src:
-            'https://raw.githubusercontent.com/Reidond/vue-turnjs/develop/static/bookblock/4.jpg'
-        },
-        {
-          src:
-            'https://raw.githubusercontent.com/Reidond/vue-turnjs/develop/static/bookblock/5.jpg'
-        }
-      ],
-      bookPages: []
+      pages: [],
+      display: 'single'
     }
   },
   created() {
@@ -84,15 +31,21 @@ export default {
   methods: {
     getBookPages() {
       getBookContent({
-        bookId: 31,
+        bookId: 30,
         pageStart: 1,
         pageEnd: 10
       }).then(res => {
         console.log(res)
-        this.bookPages = [{
+        const contents = res.data.contents.map(page => {
+          return {
+            index: page.index,
+            content: page.content.replace('\\r\\n\\r\\n', '\\r\\n')
+          }
+        })
+        this.pages = [{
           src: 'https://cdn.jsdelivr.net/gh/hjwforever/images@main/img/defaultCoverImg.png'
-        }, ...res.data.contents]
-        console.log('bookPages', this.bookPages)
+        }, ...contents]
+        console.log('pages', this.pages)
       }).catch(err => {
         console.log(err)
       })
@@ -104,5 +57,28 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+  .turn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .flip_page_double {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    line-height: 300px;
+    vertical-align: middle;
+    background: url("https://miro.medium.com/max/10368/1*o8tTGo3vsocTKnCUyz0wHA.jpeg")
+      no-repeat left center;
+    background-size: 400px 600px;
+  }
+  .flip_page_single {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    line-height: 300px;
+    vertical-align: middle;
+    background: url("https://miro.medium.com/max/10368/1*o8tTGo3vsocTKnCUyz0wHA.jpeg")
+      no-repeat left center;
+    background-size: 800px 600px;
+  }
 </style>

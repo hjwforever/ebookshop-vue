@@ -52,6 +52,13 @@ export const constantRoutes = [
   {
     path: '/read',
     // hidden: true,
+    component: () => import('@/views/books/read1.vue'),
+    meta: { title: '阅读', icon: 'dashboard' }
+  },
+
+  {
+    path: '/read1',
+    hidden: true,
     component: () => import('@/views/books/read.vue'),
     meta: { title: '阅读', icon: 'dashboard' }
   },

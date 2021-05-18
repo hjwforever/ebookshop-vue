@@ -1,21 +1,60 @@
 <template>
   <div>
-    <el-card>
-      <div v-for="page,index in pages" :key="page.index">
-        <img v-if="index === 0" :src="page.src">
-        <p v-else>{{ page.content }}</p>
+    <fw-book
+      :data="pages"
+      :start-page-index="1"
+      :auto-next-page="autoNextPage"
+      :auto-next-page-delay-time="1000"
+      :loop="loop"
+      @next="pageChange"
+      @prev="pageChange"
+      @indexPageChange="indexPageChange"
+    >
+      <template v-slot:page="{ page, index }">
+        <img v-if="index===0" :src="page.src" alt="coverImg`">
+        <div v-else>{{ page.content }}</div>
+        <!-- <p>{{ index }}：{{ page.content }}</p> -->
+      </template>
+    </fw-book>
+    <el-button tyre="primary" @click="getBookPages">获取内容</el-button>
+    <div class="turn-grid">
+      <div>
+        <h1>Double display</h1>
+        <fw-turn>
+          <div class="flip_page_double hard">Turn.js</div>
+          <div class="flip_page_double hard" />
+          <div class="flip_page_double hard">Page 1</div>
+          <div class="flip_page_double hard">Page 2</div>
+          <div class="flip_page_double hard">Page 3</div>
+          <div class="flip_page_double hard">Page 4</div>
+          <div class="flip_page_double hard" />
+          <div class="flip_page_double hard" />
+        </fw-turn>
       </div>
-    </el-card>
+      <div>
+        <h1>Single display</h1>
+        <fw-turn :options="{ display: display }">
+          <div class="flip_page_single">Turn.js</div>
+          <div class="flip_page_single" />
+          <div class="flip_page_single">Page 1</div>
+          <div class="flip_page_single">Page 2</div>
+          <div class="flip_page_single">Page 3</div>
+          <div class="flip_page_single">Page 4</div>
+          <div class="flip_page_single" />
+          <div class="flip_page_single" />
+        </fw-turn>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-// import { FwBook } from 'vue-turnjs'
+import { FwBook } from 'vue-turnjs'
 import { getBookContent } from '@/api/book'
 
 export default {
   components: {
-    // FwBook
+    FwBook
   },
   data() {
     return {
