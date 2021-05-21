@@ -1,17 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <div class="dashboard-text">name: {{ name }}</div>
-    <div class="dashboard-text">roles: <span v-for="role in roles" :key="role">{{ role }}</span></div>
-    <el-button type="primary" @click="getPublicContent">测试公共权限</el-button>
-    <!-- <el-button :disabled="!checkPermission(['admin','seller'])" type="primary" @click="getAdminContent">测试管理员权限</el-button> -->
-    <!-- <el-button v-permission="['seller']" type="primary" @click="getUserContent">测试用户权限</el-button> -->
-    <el-button type="primary" @click="getAdminContent">测试管理员权限</el-button>
-    <el-button type="primary" @click="getUserContent">测试用户权限</el-button>
-    <el-button type="primary" @click="getSellerContent">测试卖家权限</el-button>
-    <el-card>
-      {{ content }}
-    </el-card>
-    <el-button type="primary" @click="dialogVisible = true">上传</el-button>
+    <el-button type="primary" style="margin:1rem 0 " @click="beforeUpload">书籍上传</el-button>
     <UploadBook ref="upload" :limit-num.sync="limitNum" :dialog-visible.sync="dialogVisible" @updateBookList="updateBookList" />
     <BookList ref="bookList" />
   </div>
@@ -19,7 +8,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { adminTest, userTest, publicTest, sellerTest } from '@/api/authTest'
 import permission from '@/directive/permission/index.js' // 权限判断指令
 import checkPermission from '@/utils/permission' // 权限判断函数
 import BookList from '@/views/books'
@@ -52,6 +40,13 @@ export default {
   },
   methods: {
     checkPermission,
+    beforeUpload() {
+      if (!checkPermission(['admin', 'seller'])) {
+        this.$message.error('权限不足，请登录管理员或卖家账号')
+        return
+      }
+      this.dialogVisible = true
+    },
     updateBookList() {
       this.$refs.bookList.getBookList()
     },
@@ -60,51 +55,6 @@ export default {
       this.$nextTick(() => {
         this.$refs['upload'].dialogVisible = true
       })
-    },
-    getAdminContent() {
-      adminTest()
-        .then(res => {
-          this.imporRuItem()
-          console.log(res)
-          this.content = res.data
-          this.$message({
-            message: res.msg || '成功',
-            type: 'success'
-          })
-        })
-    },
-    getPublicContent() {
-      publicTest()
-        .then(res => {
-          console.log(res)
-          this.content = res.data
-          this.$message({
-            message: res.msg || '成功',
-            type: 'success'
-          })
-        })
-    },
-    getUserContent() {
-      userTest()
-        .then(res => {
-          console.log(res)
-          this.content = res.data
-          this.$message({
-            message: res.msg || '成功',
-            type: 'success'
-          })
-        })
-    },
-    getSellerContent() {
-      sellerTest()
-        .then(res => {
-          console.log(res)
-          this.content = res.data
-          this.$message({
-            message: res.msg || '成功',
-            type: 'success'
-          })
-        })
     }
   }
 }

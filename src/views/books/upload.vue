@@ -1,27 +1,59 @@
 <template>
   <div>
     <el-dialog v-if="dialogVisible" title="上传小说" :visible.sync="dialogVisible" :before-close="changeVisibility" width="40%">
-      <el-upload
-        class="ml-10"
-        :limit="limitNum"
-        :auto-upload="false"
-        accept=".txt"
-        :action="UploadUrl()"
-        :before-upload="beforeUploadFile"
-        :on-change="fileChange"
-        :on-exceed="exceedFile"
-        :on-success="handleSuccess"
-        :on-error="handleError"
-        :file-list="fileList"
-      >
-        <el-button slot="trigger" size="small" type="primary">上传本地小说</el-button>
-        <!-- <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div> -->
-        <div slot="tip" class="el-upload__tip">只能上传txt文件，且不超过10M</div>
-      </el-upload>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="changeVisibility">取 消</el-button>
-        <el-button type="primary" :disabled="!enabledUploadBtn" :icon="uploadBtnIcon " @click="handleUpload">{{ uploadBtnText }}</el-button>
-      </span>
+      <el-steps :active="step" align-center finish-status="success">
+        <el-step title="填写书籍信息" icon="el-icon-edit" />
+        <el-step title="上传书籍" icon="el-icon-upload" />
+      </el-steps>
+
+      <el-form v-if="step==0" ref="form" :model="form" label-width="120px">
+        <el-form-item label="书籍名称" required>
+          <el-input v-model="form.bookName" />
+        </el-form-item>
+        <el-form-item label="作者名">
+          <el-input v-model="form.author" />
+        </el-form-item>
+        <el-form-item label="定价">
+          <el-input-number v-model="form.price" controls-position="right" precision="1" :min="0" :max="999" />￥
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="changeVisibility">取 消</el-button>
+          <el-button :disabled="form.bookName===''" type="primary" @click="next">下一步</el-button>
+        </el-form-item>
+      </el-form>
+      <div v-if="step==1">
+        <el-row>
+          <el-col span="12" offset="6">
+            <el-upload
+              class="upload-container"
+              drag
+              :limit="limitNum"
+              :auto-upload="false"
+              accept=".txt"
+              :action="UploadUrl()"
+              :before-upload="beforeUploadFile"
+              :on-change="fileChange"
+              :on-exceed="exceedFile"
+              :on-success="handleSuccess"
+              :on-error="handleError"
+              :file-list="fileList"
+            >
+              <i class="ml-10 el-icon-upload" />
+              <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+              <!-- <el-button slot="trigger" size="small" type="primary">上传本地小说</el-button> -->
+              <!-- <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div> -->
+              <div slot="tip" class="el-upload__tip">只能上传txt文件，且不超过50M</div>
+            </el-upload>
+          </el-col>
+        </el-row>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="changeVisibility">取 消</el-button>
+          <el-button @click="pre">上一步</el-button>
+          <el-button type="primary" :disabled="!enabledUploadBtn" :icon="uploadBtnIcon " @click="handleUpload">{{ uploadBtnText }}</el-button>
+        </div>
+      </div>
+      <!-- <el-button style="margin-top: 12px;" @click="pre">上一步</el-button>
+      <el-button style="margin-top: 12px;" @click="next">下一步</el-button> -->
     </el-dialog>
   </div>
 </template>
@@ -50,7 +82,13 @@ export default {
       fileList: [], // excel文件列表
       uploadBtnIcon: '',
       uploadBtnText: '点击上传',
-      enabledUploadBtn: true
+      enabledUploadBtn: true,
+      step: 0,
+      form: {
+        bookName: '',
+        author: 'ebookshop',
+        price: 0
+      }
     }
   },
   computed: {
@@ -59,7 +97,28 @@ export default {
     ])
   },
   methods: {
+    pre() {
+      if (this.step === 0) {
+        return
+      }
+      this.step -= 1
+    },
+    next() {
+      if (this.step === 2) {
+        return
+      }
+      this.step += 1
+    },
+    clerForm() {
+      this.form = {
+        bookName: '',
+        author: 'ebookshop',
+        price: 0
+      }
+    },
     changeVisibility() {
+      this.step = 0
+      this.clerForm()
       this.$emit('update:dialogVisible', !this.dialogVisible)
     },
     UploadUrl() {
@@ -131,11 +190,9 @@ export default {
       console.log('formData', this.formData.get('uploadFile'))
 
       const bookName = book.name.toString().replace('.txt', '')
-      uploadBook({ data: this.formData, params: {
-        bookName,
-        author: this.name
-      }})
+      uploadBook({ data: this.formData, params: this.form })
         .then(res => {
+          this.next()
           this.$message.success(`书籍${bookName}上传成功`)
           console.log(res)
           this.fileList = []

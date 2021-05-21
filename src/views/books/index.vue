@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-button type="primary" @click="getBookList">获取书籍列表</el-button>
+    <!-- <el-button type="primary" @click="getBookList">获取书籍列表</el-button>
     <div v-for="item in bookList" :key="item.bookId">
       {{ item.bookName }}
     </div>
@@ -8,7 +8,27 @@
     <el-button type="primary" @click="getBookById">根据id获取书籍</el-button>
     <el-card class="col-auto">
       {{ book.bookName ? book.bookName : '' }}
+    </el-card> -->
+    <el-card>
+      <h4>书籍过滤</h4>
+      <el-switch
+        v-model="canRead"
+        active-text="过滤掉无书源或下载源的书籍"
+        inactive-text="不过滤"
+        @change="getBookList"
+      />
     </el-card>
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      :page-size="pageSize"
+      :current-page="currentPage"
+      :total="totalItems"
+      @prev-click="loadTable"
+      @current-change="loadTable"
+      @next-click="loadTable"
+    >2</el-pagination>
+
     <el-row :gutter="10">
       <el-col v-for="item in bookList" :key="item.bookId" :xs="12" :sm="8" :md="6" :lg="6" :xl="3">
         <el-card :body-style="{ padding: '0px' }" class="bookItem">
@@ -22,40 +42,46 @@
               text-color="#ff9900"
               :score-template="item.starts.toFixed(1)"
             />
-            <span>作者: {{ item.author }}</span>
-            <p>简介：{{ returnIntro(item.bookIntro) }}</p>
+            <span>{{ item.author }}</span>
+            <p>{{ returnIntro(item.bookIntro) }}</p>
             <el-button type="success" @click="beforeDownloadHandle(item)">下载</el-button>
-            <el-button type="primary">阅读</el-button>
+            <el-button :type="item.bookUri ? 'primary':''" @click="goToRead(item)">阅读</el-button>
           </div>
         </el-card>
       </el-col>
-      <el-col>
-        <el-pagination
-          background
-          layout="prev, pager, next"
-          :page-size="pageSize"
-          :current-page="currentPage"
-          :total="totalItems"
-          @prev-click="loadTable"
-          @current-change="loadTable"
-          @next-click="loadTable"
-        >2</el-pagination>
-      </el-col>
     </el-row>
+    <el-col>
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :page-size="pageSize"
+        :current-page="currentPage"
+        :total="totalItems"
+        @prev-click="loadTable"
+        @current-change="loadTable"
+        @next-click="loadTable"
+      >2</el-pagination>
+    </el-col>
     <el-dialog title="选择下载方式" :visible.sync="dialogDownloadVisible">
       <div slot="footer" class="dialog-footer">
+        <h4 v-if="dowloadBook.bookUri===null && dowloadBook.bookUrl===null">该书暂无任何下载源</h4>
+
         <el-button @click="dialogDownloadVisible = false">取 消</el-button>
         <el-button type="primary" @click="dialogDownloadVisible = false">确 定</el-button>
-        <el-button type="success" @click="downloadBookByURL">URL下载</el-button>
-        <el-button type="success" @click="downloadBookById">服务器下载</el-button>
-      </div>
-    </el-dialog>
+        <el-tooltip class="item" effect="dark" content="下载存储在云端数据库的文件" placement="top">
+          <el-button :disabled="dowloadBook.bookUrl===null" type="success" @click="downloadBookByURL">URL下载</el-button>
+        </el-tooltip>
+        <el-tooltip class="item" effect="dark" content="下载存储在服务器的文件" placement="top">
+          <el-button :disabled="dowloadBook.bookUri===null" type="success" @click="downloadBookById">服务器下载</el-button>
+        </el-tooltip>
+      </div></el-dialog>
   </div>
 </template>
 
 <script>
 import { getBookById, getBookList, downloadBookById } from '@/api/book'
 import { downloadFileByUrl } from '@/utils/file'
+import checkPermission from '@/utils/permission' // 权限判断函数
 
 export default {
   name: 'BookList',
@@ -75,6 +101,10 @@ export default {
         bookId: null,
         bookName: null
       },
+
+      // read
+      canRead: false,
+
       // upload
       autoUpload: true,
       limitNum: 10,
@@ -82,7 +112,7 @@ export default {
       uploadDialogVisible: false,
 
       // download
-      dowloadBook: null,
+      dowloadBook: {},
       dialogDownloadVisible: false
     }
   },
@@ -115,9 +145,11 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)'
       })
 
+      if (this.canRead) { this.currentPage = 1 }
       getBookList({
         pageNum: this.currentPage,
-        pageSize: this.pageSize
+        pageSize: this.pageSize,
+        canRead: this.canRead
       })
         .then(res => {
           loading.close()
@@ -158,6 +190,10 @@ export default {
         // .finally(this.$loading = false)
     },
     beforeDownloadHandle(item) {
+      if (!checkPermission(['user', 'admin', 'seller'])) {
+        this.$message.error('请登录')
+        return
+      }
       this.dowloadBook = item
       this.dialogDownloadVisible = true
       // this.$loading = true
@@ -191,7 +227,18 @@ export default {
       // .finally(this.$loading = false)
     },
     goToDetail(item) {
-      this.$router.push({ path: `books/${item.bookId}` })
+      this.$router.push({ path: `/books/${parseInt(item.bookId)}` })
+    },
+    goToRead(item) {
+      if (!checkPermission(['user', 'admin', 'seller'])) {
+        this.$message.error('请登录')
+        return
+      }
+      if (item.bookUri == null) {
+        this.$message.info('暂无该书')
+      } else {
+        this.$router.push({ path: `/read/${parseInt(item.bookId)}` })
+      }
     },
     // Upload Book
     UploadUrl() {

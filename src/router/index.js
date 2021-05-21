@@ -50,17 +50,29 @@ export const constantRoutes = [
   },
 
   {
-    path: '/read',
-    // hidden: true,
-    component: () => import('@/views/books/read1.vue'),
-    meta: { title: '阅读', icon: 'dashboard' }
+    path: '/read/:bookId',
+    hidden: true,
+    props: true,
+    component: () => import('@/views/books/read'),
+    meta: { title: '阅读', icon: 'dashboard', index: 0 }
   },
 
   {
     path: '/read1',
     hidden: true,
-    component: () => import('@/views/books/read.vue'),
-    meta: { title: '阅读', icon: 'dashboard' }
+    component: () => import('@/views/books/read1'),
+    meta: { title: '阅读1', icon: 'dashboard' }
+  },
+
+  {
+    path: '/account',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/account'),
+        meta: { title: '个人信息', icon: 'user' }
+      }]
   },
 
   {
@@ -81,141 +93,141 @@ export const constantRoutes = [
       //   meta: { title: '阅读', icon: 'dashboard' }
       // }
     ]
-  },
-
-  {
-    path: '/books',
-    component: Layout,
-    children: [
-      {
-        path: '',
-        name: 'Books',
-        component: () => import('@/views/books'),
-        meta: { title: '书城', icon: 'example' }
-      }
-    ]
-  },
-
-  {
-    path: '/example',
-    component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: 'Example', icon: 'el-icon-s-help' },
-    children: [
-      {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
-      },
-
-      {
-        path: 'form',
-        name: 'Form',
-        component: () => import('@/views/form/index'),
-        meta: { title: 'Form', icon: 'form' }
-      },
-
-      {
-        path: 'menu1',
-        component: () => import('@/views/nested/menu1/index'), // Parent router-view
-        name: 'Menu1',
-        meta: { title: 'Menu1', icon: 'nested' },
-        children: [
-          {
-            path: 'menu1-1',
-            component: () => import('@/views/nested/menu1/menu1-1'),
-            name: 'Menu1-1',
-            meta: { title: 'Menu1-1' }
-          },
-          {
-            path: 'menu1-2',
-            component: () => import('@/views/nested/menu1/menu1-2'),
-            name: 'Menu1-2',
-            meta: { title: 'Menu1-2' },
-            children: [
-              {
-                path: 'menu1-2-1',
-                component: () =>
-                  import('@/views/nested/menu1/menu1-2/menu1-2-1'),
-                name: 'Menu1-2-1',
-                meta: { title: 'Menu1-2-1' }
-              },
-              {
-                path: 'menu1-2-2',
-                component: () =>
-                  import('@/views/nested/menu1/menu1-2/menu1-2-2'),
-                name: 'Menu1-2-2',
-                meta: { title: 'Menu1-2-2' }
-              }
-            ]
-          },
-          {
-            path: 'menu1-3',
-            component: () => import('@/views/nested/menu1/menu1-3'),
-            name: 'Menu1-3',
-            meta: { title: 'Menu1-3' }
-          }
-        ]
-      },
-
-      {
-        path: 'menu2',
-        component: () => import('@/views/nested/menu2/index'),
-        meta: { title: 'menu2', icon: 'nested' }
-      },
-
-      {
-        path: 'permission',
-        component: Layout,
-        redirect: '/example/permission/page',
-        alwaysShow: true, // will always show the root menu
-        name: 'Permission',
-        meta: {
-          title: 'Permission',
-          icon: 'lock',
-          roles: ['admin', 'editor'] // you can set roles in root nav
-        },
-        children: [
-          {
-            path: 'page',
-            component: () => import('@/views/permission/page'),
-            name: 'PagePermission',
-            meta: {
-              title: 'Page Permission',
-              roles: ['admin'] // or you can only set roles in sub nav
-            }
-          },
-          {
-            path: 'directive',
-            component: () => import('@/views/permission/directive'),
-            name: 'DirectivePermission',
-            meta: {
-              title: 'Directive Permission'
-              // if do not set roles, means: this page does not require permission
-            }
-          },
-          {
-            path: 'role',
-            component: () => import('@/views/permission/role'),
-            name: 'RolePermission',
-            meta: {
-              title: 'Role Permission',
-              roles: ['admin']
-            }
-          }
-        ]
-      }
-
-    ]
   }
+
+  // ,{
+  //   path: '/books',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: '',
+  //       name: 'Books',
+  //       component: () => import('@/views/books'),
+  //       meta: { title: '书城', icon: 'example' }
+  //     }
+  //   ]
+  // }
+
+  // ,{
+  //   path: '/example',
+  //   component: Layout,
+  //   redirect: '/example/table',
+  //   name: 'Example',
+  //   meta: { title: 'Example', icon: 'el-icon-s-help' },
+  //   children: [
+  //     {
+  //       path: 'table',
+  //       name: 'Table',
+  //       component: () => import('@/views/table/index'),
+  //       meta: { title: 'Table', icon: 'table' }
+  //     },
+  //     {
+  //       path: 'tree',
+  //       name: 'Tree',
+  //       component: () => import('@/views/tree/index'),
+  //       meta: { title: 'Tree', icon: 'tree' }
+  //     },
+
+  //     {
+  //       path: 'form',
+  //       name: 'Form',
+  //       component: () => import('@/views/form/index'),
+  //       meta: { title: 'Form', icon: 'form' }
+  //     },
+
+  //     {
+  //       path: 'menu1',
+  //       component: () => import('@/views/nested/menu1/index'), // Parent router-view
+  //       name: 'Menu1',
+  //       meta: { title: 'Menu1', icon: 'nested' },
+  //       children: [
+  //         {
+  //           path: 'menu1-1',
+  //           component: () => import('@/views/nested/menu1/menu1-1'),
+  //           name: 'Menu1-1',
+  //           meta: { title: 'Menu1-1' }
+  //         },
+  //         {
+  //           path: 'menu1-2',
+  //           component: () => import('@/views/nested/menu1/menu1-2'),
+  //           name: 'Menu1-2',
+  //           meta: { title: 'Menu1-2' },
+  //           children: [
+  //             {
+  //               path: 'menu1-2-1',
+  //               component: () =>
+  //                 import('@/views/nested/menu1/menu1-2/menu1-2-1'),
+  //               name: 'Menu1-2-1',
+  //               meta: { title: 'Menu1-2-1' }
+  //             },
+  //             {
+  //               path: 'menu1-2-2',
+  //               component: () =>
+  //                 import('@/views/nested/menu1/menu1-2/menu1-2-2'),
+  //               name: 'Menu1-2-2',
+  //               meta: { title: 'Menu1-2-2' }
+  //             }
+  //           ]
+  //         },
+  //         {
+  //           path: 'menu1-3',
+  //           component: () => import('@/views/nested/menu1/menu1-3'),
+  //           name: 'Menu1-3',
+  //           meta: { title: 'Menu1-3' }
+  //         }
+  //       ]
+  //     },
+
+  //     {
+  //       path: 'menu2',
+  //       component: () => import('@/views/nested/menu2/index'),
+  //       meta: { title: 'menu2', icon: 'nested' }
+  //     },
+
+  //     {
+  //       path: 'permission',
+  //       component: Layout,
+  //       redirect: '/example/permission/page',
+  //       alwaysShow: true, // will always show the root menu
+  //       name: 'Permission',
+  //       meta: {
+  //         title: 'Permission',
+  //         icon: 'lock',
+  //         roles: ['admin', 'editor'] // you can set roles in root nav
+  //       },
+  //       children: [
+  //         {
+  //           path: 'page',
+  //           component: () => import('@/views/permission/page'),
+  //           name: 'PagePermission',
+  //           meta: {
+  //             title: 'Page Permission',
+  //             roles: ['admin'] // or you can only set roles in sub nav
+  //           }
+  //         },
+  //         {
+  //           path: 'directive',
+  //           component: () => import('@/views/permission/directive'),
+  //           name: 'DirectivePermission',
+  //           meta: {
+  //             title: 'Directive Permission'
+  //             // if do not set roles, means: this page does not require permission
+  //           }
+  //         },
+  //         {
+  //           path: 'role',
+  //           component: () => import('@/views/permission/role'),
+  //           name: 'RolePermission',
+  //           meta: {
+  //             title: 'Role Permission',
+  //             roles: ['admin']
+  //           }
+  //         }
+  //       ]
+  //     }
+
+  //   ]
+  // }
 
 ]
 
@@ -290,7 +302,7 @@ export const asyncRoutes = [
     children: [
       {
         path: 'https://github.com/hjwforever/ebookshop-vue',
-        meta: { title: '外链', icon: 'link' }
+        meta: { title: 'GIthub', icon: 'link' }
       }
     ]
   },
