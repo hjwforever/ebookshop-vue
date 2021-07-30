@@ -4,11 +4,10 @@
 
 [Github](https://github.com/hjwforever/ebookshop-vue)
 
-[Demo](https://ebookshop.aruoxi.com)
+~~[Demo](https://ebookshop.aruoxi.com)~~
 
 ## Related Repositories
 
-- [E-book Shop Client with Vue2](https://github.com/hjwforever/ebookshop-vue)
 - [E-book Shop Server with SpringBoot](https://github.com/hjwforever/ebookshop)
 - [E-book Shop Server with SpringBoot MicroServices](https://github.com/hjwforever/ebookshop-microservice)
 
